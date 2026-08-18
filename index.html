@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Resume Screening & Candidate Recommendation</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef2ff, #f8f9fc);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 94%;
+            max-width: 1200px;
+            margin: 35px auto;
+        }
+
+        /* ================= HEADER ================= */
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1f3c88;
+            font-size: 34px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* ================= CARD ================= */
+
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            color: #1f3c88;
+            margin-bottom: 20px;
+        }
+
+        /* ================= FORM ================= */
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 190px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 9px;
+            resize: vertical;
+            font-size: 15px;
+            line-height: 1.5;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #1f3c88;
+        }
+
+        .upload-section {
+            margin-top: 25px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 18px;
+            border: 2px dashed #aaa;
+            border-radius: 10px;
+            background: #fafbff;
+            cursor: pointer;
+        }
+
+        .upload-note {
+            margin-top: 8px;
+            color: #777;
+            font-size: 13px;
+        }
+
+        /* ================= BUTTON ================= */
+
+        .button-container {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        button {
+            background: #1f3c88;
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #162d68;
+        }
+
+        /* ================= ERROR ================= */
+
+        .error {
+            background: #ffe6e6;
+            color: #b71c1c;
+            padding: 16px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+            border-left: 5px solid #d32f2f;
+        }
+
+        /* ================= SUMMARY ================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .summary-box {
+            padding: 20px 12px;
+            border-radius: 12px;
+            text-align: center;
+            background: #f8f9fc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .summary-box h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .summary-number {
+            font-size: 30px;
+            font-weight: bold;
+            color: #1f3c88;
+        }
+
+        .summary-box small {
+            color: #777;
+        }
+
+        /* ================= TABLE ================= */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background: #1f3c88;
+            color: white;
+            padding: 14px 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8f9fc;
+        }
+
+        .rank {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .candidate-name {
+            font-weight: bold;
+            color: #1f3c88;
+        }
+
+        .score {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f3c88;
+        }
+
+        /* ================= BADGES ================= */
+
+        .badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* ================= DETAILS ================= */
+
+        .details {
+            margin-top: 25px;
+        }
+
+        .candidate-card {
+            border: 1px solid #e3e6eb;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 18px;
+            background: #fff;
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .candidate-header h3 {
+            color: #1f3c88;
+        }
+
+        .candidate-score {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1f3c88;
+        }
+
+        /* ================= SCORE GRID ================= */
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .score-box {
+            background: #f8f9fc;
+            border-radius: 9px;
+            padding: 15px 8px;
+            text-align: center;
+            border: 1px solid #e6e8ee;
+        }
+
+        .score-box h4 {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .score-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f3c88;
+        }
+
+        /* ================= SKILLS ================= */
+
+        .skill-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .skill-box {
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        .matched {
+            background: #f0fff4;
+            border: 1px solid #c8e6c9;
+        }
+
+        .missing {
+            background: #fff5f5;
+            border: 1px solid #ffcdd2;
+        }
+
+        .skill-box h4 {
+            margin-bottom: 10px;
+        }
+
+        .matched h4 {
+            color: #218838;
+        }
+
+        .missing h4 {
+            color: #c82333;
+        }
+
+        .skill {
+            display: inline-block;
+            padding: 6px 10px;
+            margin: 3px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .matched .skill {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .missing .skill {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .no-skills {
+            color: #777;
+            font-size: 13px;
+        }
+
+        /* ================= FOOTER ================= */
+
+        .footer {
+            text-align: center;
+            color: #777;
+            margin-top: 30px;
+            padding-bottom: 25px;
+            font-size: 14px;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1000px) {
+
+            .summary-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .score-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .container {
+                width: 95%;
+            }
+
+            .header h1 {
+                font-size: 27px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .score-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .skill-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+        }
+
+        @media (max-width: 450px) {
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- ================================================= -->
+    <!-- HEADER -->
+    <!-- ================================================= -->
+
+    <div class="header">
+
+        <h1>
+            🤖 AI Resume Screening & Candidate Recommendation
+        </h1>
+
+        <p>
+            Intelligent Resume Analysis, Screening and Candidate Ranking
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ERROR -->
+    <!-- ================================================= -->
+
+    {% if error %}
+
+    <div class="error">
+
+        <strong>⚠ Error:</strong>
+
+        {{ error }}
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- ================================================= -->
+    <!-- JOB DESCRIPTION + UPLOAD -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            📋 Job Requirements
+        </h2>
+
+
+        <form
+            action="/screen"
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+
+            <label for="job_description">
+
+                Job Description
+
+            </label>
+
+
+            <textarea
+                id="job_description"
+                name="job_description"
+                placeholder="Enter the complete job description here..."
+                required
+            >{{ job_description if job_description else '' }}</textarea>
+
+
+            <!-- ================= FILE UPLOAD ================= -->
+
+            <div class="upload-section">
+
+                <label for="resumes">
+
+                    📄 Upload Multiple Resume PDFs
+
+                </label>
+
+
+                <input
+                    type="file"
+                    id="resumes"
+                    name="resumes"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    required
+                >
+
+
+                <p class="upload-note">
+
+                    You can select multiple PDF resumes
+                    using Ctrl + Click or Shift + Click.
+
+                </p>
+
+            </div>
+
+
+            <!-- ================= BUTTON ================= -->
+
+            <div class="button-container">
+
+                <button type="submit">
+
+                    🔍 Analyze Candidates
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- RESULTS -->
+    <!-- ================================================= -->
+
+    {% if candidates is defined %}
+
+
+    <!-- ================================================= -->
+    <!-- SUMMARY -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            📊 Screening Summary
+        </h2>
+
+
+        <div class="summary-grid">
+
+
+            <!-- TOTAL -->
+
+            <div class="summary-box">
+
+                <h3>
+                    👥 Candidates
+                </h3>
+
+                <div class="summary-number">
+
+                    {{ total_candidates }}
+
+                </div>
+
+                <small>
+                    Analyzed
+                </small>
+
+            </div>
+
+
+            <!-- HIGHLY RECOMMENDED -->
+
+            <div class="summary-box">
+
+                <h3>
+                    🟢 Highly Recommended
+                </h3>
+
+                <div class="summary-number">
+
+                    {{ highly_recommended }}
+
+                </div>
+
+                <small>
+                    80% and above
+                </small>
+
+            </div>
+
+
+            <!-- RECOMMENDED -->
+
+            <div class="summary-box">
+
+                <h3>
+                    🔵 Recommended
+                </h3>
+
+                <div class="summary-number">
+
+                    {{ recommended }}
+
+                </div>
+
+                <small>
+                    65% – 79%
+                </small>
+
+            </div>
+
+
+            <!-- NEEDS REVIEW -->
+
+            <div class="summary-box">
+
+                <h3>
+                    🟡 Needs Review
+                </h3>
+
+                <div class="summary-number">
+
+                    {{ needs_review }}
+
+                </div>
+
+                <small>
+                    50% – 64%
+                </small>
+
+            </div>
+
+
+            <!-- NOT RECOMMENDED -->
+
+            <div class="summary-box">
+
+                <h3>
+                    🔴 Not Recommended
+                </h3>
+
+                <div class="summary-number">
+
+                    {{ not_recommended }}
+
+                </div>
+
+                <small>
+                    Below 50%
+                </small>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CANDIDATE RANKING -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            🏆 Candidate Ranking
+        </h2>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Rank
+                        </th>
+
+                        <th>
+                            Candidate
+                        </th>
+
+                        <th>
+                            Overall Score
+                        </th>
+
+                        <th>
+                            Skills
+                        </th>
+
+                        <th>
+                            Experience
+                        </th>
+
+                        <th>
+                            Recommendation
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% for candidate in candidates %}
+
+                    <tr>
+
+
+                        <!-- RANK -->
+
+                        <td class="rank">
+
+                            {% if candidate.rank == 1 %}
+
+                                🥇
+
+                            {% elif candidate.rank == 2 %}
+
+                                🥈
+
+                            {% elif candidate.rank == 3 %}
+
+                                🥉
+
+                            {% else %}
+
+                                {{ candidate.rank }}
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- NAME -->
+
+                        <td>
+
+                            <div class="candidate-name">
+
+                                {{ candidate.filename }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- SCORE -->
+
+                        <td>
+
+                            <span class="score">
+
+                                {{ candidate.score }}%
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- SKILL -->
+
+                        <td>
+
+                            {{ candidate.skill_score }}%
+
+                        </td>
+
+
+                        <!-- EXPERIENCE -->
+
+                        <td>
+
+                            {{ candidate.experience_score }}%
+
+                        </td>
+
+
+                        <!-- RECOMMENDATION -->
+
+                        <td>
+
+                            <span
+                                class="badge {{ candidate.result_class }}"
+                            >
+
+                                {% if candidate.recommendation == "Highly Recommended" %}
+
+                                    🟢 Highly Recommended
+
+                                {% elif candidate.recommendation == "Recommended" %}
+
+                                    🔵 Recommended
+
+                                {% elif candidate.recommendation == "Needs Review" %}
+
+                                    🟡 Needs Review
+
+                                {% else %}
+
+                                    🔴 Not Recommended
+
+                                {% endif %}
+
+                            </span>
+
+                        </td>
+
+
+                    </tr>
+
+                {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- DETAILED CANDIDATE ANALYSIS -->
+    <!-- ================================================= -->
+
+    <div class="card">
+
+        <h2>
+            🔎 Detailed Candidate Analysis
+        </h2>
+
+
+        <div class="details">
+
+
+        {% for candidate in candidates %}
+
+
+            <div class="candidate-card">
+
+
+                <!-- HEADER -->
+
+                <div class="candidate-header">
+
+                    <div>
+
+                        <h3>
+
+                            #{{ candidate.rank }}
+
+                            {{ candidate.filename }}
+
+                        </h3>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="candidate-score">
+
+                            {{ candidate.score }}%
+
+                        </div>
+
+
+                        <span
+                            class="badge {{ candidate.result_class }}"
+                        >
+
+                            {{ candidate.recommendation }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SCORE COMPONENTS -->
+
+                <div class="score-grid">
+
+
+                    <div class="score-box">
+
+                        <h4>
+                            🛠️ Skills
+                        </h4>
+
+                        <div class="score-value">
+
+                            {{ candidate.skill_score }}%
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <h4>
+                            🧠 TF-IDF
+                        </h4>
+
+                        <div class="score-value">
+
+                            {{ candidate.text_score }}%
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <h4>
+                            💼 Experience
+                        </h4>
+
+                        <div class="score-value">
+
+                            {{ candidate.experience_score }}%
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <h4>
+                            🎓 Education
+                        </h4>
+
+                        <div class="score-value">
+
+                            {{ candidate.education_score }}%
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <h4>
+                            👨‍💻 Job Title
+                        </h4>
+
+                        <div class="score-value">
+
+                            {{ candidate.title_score }}%
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- EXPERIENCE -->
+
+                <p style="margin-bottom:15px;">
+
+                    <strong>
+                        Required Experience:
+                    </strong>
+
+                    {{ candidate.required_experience }} years
+
+                    &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                    <strong>
+                        Candidate Experience:
+                    </strong>
+
+                    {{ candidate.candidate_experience }} years
+
+                </p>
+
+
+                <!-- SKILLS -->
+
+                <div class="skill-columns">
+
+
+                    <!-- MATCHED -->
+
+                    <div class="skill-box matched">
+
+                        <h4>
+                            ✅ Matched Skills
+                        </h4>
+
+
+                        {% if candidate.matched_skills %}
+
+                            {% for skill in candidate.matched_skills %}
+
+                                <span class="skill">
+
+                                    {{ skill }}
+
+                                </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <p class="no-skills">
+
+                                No matching skills found.
+
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- MISSING -->
+
+                    <div class="skill-box missing">
+
+                        <h4>
+                            ❌ Missing Skills
+                        </h4>
+
+
+                        {% if candidate.missing_skills %}
+
+                            {% for skill in candidate.missing_skills %}
+
+                                <span class="skill">
+
+                                    {{ skill }}
+
+                                </span>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <p class="no-skills">
+
+                                🎉 No missing skills!
+
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        {% endfor %}
+
+
+        </div>
+
+    </div>
+
+
+    {% endif %}
+
+
+    <!-- ================================================= -->
+    <!-- FOOTER -->
+    <!-- ================================================= -->
+
+    <div class="footer">
+
+        <p>
+            AI Resume Screening & Candidate Recommendation System
+        </p>
+
+        <p style="margin-top:6px;">
+
+            Python • Flask • PyPDF2 • Scikit-learn • TF-IDF
+
+        </p>
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
